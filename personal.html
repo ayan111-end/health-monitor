@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人健康监测中心</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        body {
+            background: #0a1228;
+            color: #fff;
+            padding: 16px;
+            min-height: 100vh;
+            transition: all 0.3s;
+        }
+        body.light {
+            background: #f5f7fa;
+            color: #222;
+        }
+
+        .modal-mask{
+            position:fixed;top:0;left:0;width:100vw;height:100vh;
+            background:rgba(0,0,0,0.6);z-index:999;display:none;
+            align-items:center;justify-content:center;
+        }
+        .modal{
+            background:#121d37;border:2px solid #00d4ff;border-radius:12px;
+            width:90%;max-width:400px;padding:20px;animation:glowBorder 2.5s infinite alternate;
+        }
+        body.light .modal{
+            background:#fff;color:#222;border-color:#ccc;
+        }
+        .modal-title{
+            color:#00d4ff;font-size:18px;margin-bottom:16px;font-weight:bold;
+        }
+        .form-item{
+            margin-bottom:12px;
+        }
+        .form-item label{
+            display:block;margin-bottom:6px;font-size:14px;color:#8ab4f8;
+        }
+        .form-item input, .form-item select{
+            width:100%;height:38px;padding:0 10px;background:#0f1a30;border:1px solid #00d4ff;
+            border-radius:6px;color:#fff;outline:none;
+        }
+        body.light .form-item input, body.light .form-item select{
+            background:#fff;color:#222;border-color:#aaa;
+        }
+        .modal-btns{
+            display:flex;gap:10px;margin-top:20px;
+        }
+        .modal-btn{
+            flex:1;padding:10px;border-radius:6px;border:none;cursor:pointer;font-weight:bold;
+        }
+        .btn-primary{
+            background:#00d4ff;color:#000;
+        }
+        .btn-close{
+            background:#334155;color:#fff;
+        }
+
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #0a1228;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .loader-circle {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(0,212,255,0.2);
+            border-top: 4px solid #00d4ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loading-text {
+            color: #00d4ff;
+            font-size: 16px;
+            font-weight: bold;
+            animation: fade 1.5s infinite alternate;
+        }
+        @keyframes fade {
+            0% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes glowText {
+            0%{text-shadow:0 0 4px #00d4ff}
+            50%{text-shadow:0 0 12px #00d4ff}
+            100%{text-shadow:0 0 4px #00d4ff}
+        }
+        @keyframes glowBorder {
+            0%{box-shadow:0 0 8px #00d4ff,0 0 16px rgba(0,212,255,0.3)}
+            50%{box-shadow:0 0 16px #00d4ff,0 0 32px rgba(0,212,255,0.5)}
+            100%{box-shadow:0 0 8px #00d4ff,0 0 16px rgba(0,212,255,0.3)}
+        }
+
+        .header,
+        .device-panel,
+        .kpi,
+        .panel,
+        .event-log,
+        .health-tip,
+        .ai-chat-container,
+        .human-box,
+        .profile-card {
+            border: 2px solid #00d4ff !important;
+            box-shadow: 0 0 10px #00d4ff, 0 0 20px rgba(0,212,255,0.3) !important;
+            background: rgba(18,29,55,0.92) !important;
+            border-radius: 12px !important;
+            animation: glowBorder 2.5s infinite alternate !important;
+        }
+        body.light .header,
+        body.light .device-panel,
+        body.light .kpi,
+        body.light .panel,
+        body.light .event-log,
+        body.light .health-tip,
+        body.light .ai-chat-container,
+        body.light .human-box,
+        body.light .profile-card{
+            background:#fff !important;
+            border-color:#ccc !important;
+            box-shadow:0 0 10px #ddd !important;
+        }
+
+        .profile-card{
+            padding:16px;margin-bottom:16px;
+        }
+        .profile-title{
+            color:#00d4ff;font-size:16px;font-weight:bold;margin-bottom:12px;
+        }
+        .profile-row{
+            display:flex;justify-content:space-between;padding:6px 0;font-size:14px;color:#8ab4f8;
+        }
+
+        .tool-bar{
+            display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;
+        }
+        .tool-btn{
+            padding:8px 14px;background:#00d4ff;color:#000;border:none;border-radius:6px;cursor:pointer;font-weight:bold;
+        }
+
+        .header{padding:12px 20px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+        .header .title{color:#00d4ff;font-size:22px;font-weight:bold;animation:glowText 2s infinite alternate;}
+        .header .user-info{color:#8ab4f8;font-size:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+        .back-btn{background:#0099ff;color:#fff;border:none;padding:6px 14px;border-radius:6px;cursor:pointer;font-weight:bold;font-size:14px;display:none;}
+        .logout{color:#ff4c4c;cursor:pointer;font-weight:bold;}
+        .theme-btn{
+            background:#00d4ff;color:#000;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-weight:bold;
+        }
+        .device-panel{padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px;}
+        .device-label{color:#8ab4f8;}
+        .device-status{color:#ff4c4c;font-weight:bold;}
+        .device-btn{background:#0099ff;color:#fff;border:none;padding:6px 14px;border-radius:6px;cursor:pointer;}
+        .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px;}
+        .kpi{padding:20px;text-align:center;transition:all 0.3s;}
+        .kpi:hover{transform:scale(1.05);}
+        .kpi .num{font-size:36px;color:#00d4ff;font-weight:bold;margin-bottom:8px;animation:glowText 2s infinite alternate;}
+        .kpi .num.warn{animation:warnFlash 1s infinite alternate;}
+        @keyframes warnFlash{
+            0%{color:#ff4c4c;}100%{color:#fff;}
+        }
+        .kpi .lab{font-size:14px;color:#8ab4f8;}
+        .top-row{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px;}
+        .mid-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;}
+        .bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+        .panel{padding:20px;height:100%;}
+        .panel-title{font-size:18px;color:#00d4ff;margin-bottom:16px;font-weight:bold;animation:glowText 2s infinite alternate;}
+        .chart{width:100%;height:290px;}
+        .human-box{width:100%;height:200px;position:relative;overflow:hidden;margin:10px 0 14px;}
+        .dot{position:absolute;background:#00d4ff;border-radius:50%;box-shadow:0 0 8px #00d4ff;transform:translate(-50%,-50%);transition:all 0.2s;cursor:pointer;}
+        .dot.active{transform:translate(-50%,-50%) scale(1.6);background:#ff4c4c;box-shadow:0 0 12px #ff4c4c;}
+        .human-model{width:100%;height:100%;position:relative;animation:rotate 20s linear infinite;transform-style:preserve-3d;}
+        .human-model.stop{animation:none;}
+        @keyframes rotate{0%{transform:rotateY(0deg);}100%{transform:rotateY(360deg);}}
+        .pose-item{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #1e2a46;font-size:14px;color:#8ab4f8;}
+        .pose-status{font-weight:bold;}
+        .pose-normal{color:#22c55e;}
+        .pose-warning{color:#f59e0b;}
+        .pose-danger{color:#ff4c4c;}
+        .detail-btn{background:#00d4ff;color:#000;border:none;padding:9px 14px;border-radius:8px;width:100%;cursor:pointer;margin-top:10px;font-weight:bold;}
+        .detail-btn.danger{background:#ff4c4c;color:#fff;}
+        .event-log,.health-tip{padding:14px;height:140px;font-size:13px;color:#8ab4f8;overflow-y:auto;line-height:1.5;}
+        .sub-title{font-size:14px;color:#00d4ff;margin-bottom:10px;font-weight:bold;animation:glowText 2s infinite alternate;}
+        .ai-chat-container{height:220px;padding:14px;overflow-y:auto;margin-bottom:12px;font-size:14px;line-height:1.6;}
+        .ai-input-bar{display:flex;gap:8px;}
+        .ai-input-bar input{flex:1;height:40px;padding:0 12px;background:#0f1a30;border:1px solid #00d4ff;border-radius:8px;color:#fff;outline:none;}
+        body.light .ai-input-bar input{
+            background:#fff;color:#222;border-color:#aaa;
+        }
+        .ai-input-bar button{padding:0 16px;background:#00d4ff;border:none;border-radius:8px;color:#000;font-weight:bold;cursor:pointer;}
+        .msg-user{color:#8ab4f8;text-align:right;margin-bottom:6px;}
+        .msg-ai{color:#00d4ff;margin-bottom:6px;}
+
+        .search-wrapper {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .search-wrapper input {
+            flex: 1;
+            height: 42px;
+            padding: 0 16px;
+            background: rgba(18,29,55,0.9);
+            border: 2px solid #00d4ff;
+            border-radius: 8px;
+            color: #fff;
+            outline: none;
+        }
+        .search-wrapper button {
+            padding: 0 20px;
+            background: #00d4ff;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="modal-mask" id="firstInfoModal">
+    <div class="modal">
+        <div class="modal-title">完善个人信息</div>
+        <div class="form-item">
+            <label>身高（cm）</label>
+            <input id="firstHeight" type="number" placeholder="请输入身高">
+        </div>
+        <div class="form-item">
+            <label>体重（kg）</label>
+            <input id="firstWeight" type="number" placeholder="请输入体重">
+        </div>
+        <div class="form-item">
+            <label>年龄（岁）</label>
+            <input id="firstAge" type="number" placeholder="请输入年龄">
+        </div>
+        <div class="form-item">
+            <label>性别</label>
+            <select id="firstGender">
+                <option value="男">男</option>
+                <option value="女">女</option>
+            </select>
+        </div>
+        <div class="modal-btns">
+            <button class="modal-btn btn-primary" onclick="saveFirstInfo()">保存信息</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-mask" id="dataModal">
+    <div class="modal">
+        <div class="modal-title">手动录入健康数据</div>
+        <div class="form-item">
+            <label>平均心率</label>
+            <input type="number" id="inpHeart" placeholder="请输入">
+        </div>
+        <div class="form-item">
+            <label>睡眠时长(小时)</label>
+            <input type="number" id="inpSleep" placeholder="请输入">
+        </div>
+        <div class="form-item">
+            <label>体重(kg)</label>
+            <input type="number" id="inpWeight" placeholder="请输入">
+        </div>
+        <div class="modal-btns">
+            <button class="modal-btn btn-close" onclick="closeModal()">取消</button>
+            <button class="modal-btn btn-primary" onclick="saveData()">保存</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-mask" id="reportModal">
+    <div class="modal">
+        <div class="modal-title">健康报告</div>
+        <div id="reportText" style="font-size:14px;line-height:1.8;color:#8ab4f8;"></div>
+        <button class="modal-btn btn-primary" style="width:100%;margin-top:20px;" onclick="closeReport()">关闭</button>
+    </div>
+</div>
+
+<div class="loading-screen" id="loading">
+    <div class="loader-circle"></div>
+    <div class="loading-text">系统启动中，请稍候...</div>
+</div>
+
+<div class="header">
+    <div class="title">🏥 个人健康监测中心</div>
+    <div class="user-info">
+        当前用户：<span id="currentUser"></span>
+        <button class="back-btn" id="backBtn">返回企业大屏</button>
+        <button class="theme-btn" onclick="toggleTheme()">切换主题</button>
+        <span class="logout" onclick="logout()">退出登录</span>
+    </div>
+</div>
+
+<div class="profile-card">
+    <div class="profile-title">👤 个人健康档案</div>
+    <div class="profile-row"><span>身高</span><span id="pHeight">-- cm</span></div>
+    <div class="profile-row"><span>体重</span><span id="pWeight">-- kg</span></div>
+    <div class="profile-row"><span>BMI</span><span id="pBmi">--</span></div>
+    <div class="profile-row"><span>年龄</span><span id="pAge">-- 岁</span></div>
+    <div class="profile-row"><span>性别</span><span id="pGender">--</span></div>
+</div>
+
+<div class="tool-bar">
+    <button class="tool-btn" onclick="showModal()">✍️ 手动录入数据</button>
+    <button class="tool-btn" onclick="showReport()">📄 查看健康报告</button>
+    <button class="tool-btn" onclick="refreshData()">🔄 刷新数据</button>
+    <button class="tool-btn" onclick="clearLog()">🧹 清空日志</button>
+    <button class="tool-btn" onclick="toggleRotate()">🔄 3D旋转开关</button>
+    <button class="tool-btn" onclick="playAlarm()">🔔 测试报警声</button>
+</div>
+
+<div class="device-panel">
+    <span class="device-label">📡 物联网设备：</span>
+    <span id="deviceStatus" class="device-status">未连接</span>
+    <button class="device-btn" onclick="connectDevice()">连接智能设备</button>
+</div>
+
+<div class="kpis" id="kpisContainer"></div>
+
+<div class="top-row">
+    <div class="panel">
+        <div class="panel-title">ℹ️ 睡眠分期监测</div>
+        <div id="sleepChart" class="chart"></div>
+    </div>
+    <div class="panel">
+        <div class="panel-title">📈 实时心脏振动波形</div>
+        <div id="chart1" class="chart"></div>
+    </div>
+</div>
+
+<div class="mid-row">
+    <div class="panel">
+        <div class="panel-title">📊 健康维度评分</div>
+        <div id="chart2" style="height:240px;"></div>
+    </div>
+    <div class="panel">
+        <div class="panel-title">📈 7天健康趋势</div>
+        <div id="chart3" style="height:240px;"></div>
+    </div>
+    <div class="panel">
+        <div class="panel-title">🧍 体态 & 跌倒监测</div>
+        <div class="human-box" id="humanBox">
+            <div class="human-model" id="humanModel">
+                <span class="dot" data-name="头部" style="width:4px;height:4px;top:20px;left:50%"></span>
+                <span class="dot" data-name="左眼" style="width:3px;height:3px;top:17px;left:48%"></span>
+                <span class="dot" data-name="右眼" style="width:3px;height:3px;top:17px;left:52%"></span>
+                <span class="dot" data-name="左耳" style="width:3px;height:3px;top:24px;left:47%"></span>
+                <span class="dot" data-name="右耳" style="width:3px;height:3px;top:24px;left:53%"></span>
+                <span class="dot" data-name="颈部" style="width:4px;height:4px;top:45px;left:50%"></span>
+                <span class="dot" data-name="左肩" style="width:4px;height:4px;top:65px;left:41%"></span>
+                <span class="dot" data-name="右肩" style="width:4px;height:4px;top:65px;left:59%"></span>
+                <span class="dot" data-name="左肘" style="width:4px;height:4px;top:85px;left:45%"></span>
+                <span class="dot" data-name="右肘" style="width:4px;height:4px;top:85px;left:55%"></span>
+                <span class="dot" data-name="左手腕" style="width:4px;height:4px;top:105px;left:48%"></span>
+                <span class="dot" data-name="右手腕" style="width:4px;height:4px;top:105px;left:52%"></span>
+                <span class="dot" data-name="左腰" style="width:4px;height:4px;top:125px;left:43%"></span>
+                <span class="dot" data-name="右腰" style="width:4px;height:4px;top:125px;left:57%"></span>
+                <span class="dot" data-name="左髋" style="width:3px;height:3px;top:55px;left:30%"></span>
+                <span class="dot" data-name="左膝" style="width:3px;height:3px;top:75px;left:20%"></span>
+                <span class="dot" data-name="左踝" style="width:3px;height:3px;top:95px;left:12%"></span>
+                <span class="dot" data-name="右髋" style="width:3px;height:3px;top:55px;left:70%"></span>
+                <span class="dot" data-name="右膝" style="width:3px;height:3px;top:75px;left:80%"></span>
+                <span class="dot" data-name="右踝" style="width:3px;height:3px;top:95px;left:88%"></span>
+                <span class="dot" data-name="左腿根" style="width:3px;height:3px;top:150px;left:43%"></span>
+                <span class="dot" data-name="左小腿" style="width:3px;height:3px;top:185px;left:43%"></span>
+                <span class="dot" data-name="左脚" style="width:3px;height:3px;top:220px;left:43%"></span>
+                <span class="dot" data-name="右腿根" style="width:3px;height:3px;top:150px;left:57%"></span>
+                <span class="dot" data-name="右小腿" style="width:3px;height:3px;top:185px;left:57%"></span>
+                <span class="dot" data-name="右脚" style="width:3px;height:3px;top:220px;left:57%"></span>
+            </div>
+        </div>
+        <div class="pose-item">
+            <span>当前姿态</span>
+            <span class="pose-status pose-normal">站立 / 行走</span>
+        </div>
+        <div class="pose-item">
+            <span>身体倾斜角</span>
+            <span class="pose-status pose-normal">12°（正常）</span>
+        </div>
+        <div class="pose-item">
+            <span>跌倒风险</span>
+            <span class="pose-status pose-normal">无风险</span>
+        </div>
+        <div class="pose-item">
+            <span>毫米波雷达</span>
+            <span class="pose-status pose-normal">人体跟踪中</span>
+        </div>
+        <button class="detail-btn" onclick="checkFall()">跌倒检测</button>
+        <button class="detail-btn" onclick="exportReport()">导出报告</button>
+        <button class="detail-btn" onclick="toggleElderMode()">老年模式</button>
+        <button class="detail-btn danger" onclick="callEmergency()">🚨 紧急呼叫</button>
+    </div>
+</div>
+
+<div class="bottom-row">
+    <div class="panel">
+        <div class="sub-title">📋 健康事件日志</div>
+        <div id="eventLog" class="event-log">
+            <div>✅ 系统启动，开始健康监测</div>
+        </div>
+    </div>
+    <div class="panel">
+        <div class="sub-title">💡 健康小贴士</div>
+        <div class="health-tip">
+            <div id="healthTip">心率低于50或高于100均属于异常，易引发头晕、跌倒风险。</div>
+        </div>
+    </div>
+</div>
+
+<div class="panel" id="aiPanel">
+    <div class="panel-title">🤖 AI 健康咨询助手</div>
+    <div class="ai-chat-container" id="aiChat">
+        <div class="msg-ai">你好！我是AI健康助手，你可以问我心率、睡眠、呼吸、疲劳等问题~</div>
+    </div>
+    <div class="ai-input-bar">
+        <input id="aiQuestion" placeholder="例如：心率多少正常？">
+        <button onclick="askAI()">发送</button>
+    </div>
+</div>
+
+<div class="search-wrapper">
+    <input id="searchInput" placeholder="搜索健康知识、毫米波雷达资料..." onkeydown="if(event.key==='Enter') doSearch()">
+    <button onclick="doSearch()">搜索</button>
+</div>
+
+<script>
+let isAlarmPlaying = false;
+let warnTimer = null;
+let isDeviceConnected = false; 
+
+function playWarning() {
+  try {
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ac.createOscillator();
+    const g = ac.createGain();
+    o.type = 'sine';
+    o.frequency.value = 800;
+    g.gain.value = 0.1;
+    o.connect(g);
+    g.connect(ac.destination);
+    o.start();
+    o.stop(ac.currentTime + 0.15);
+  } catch(e) {}
+}
+
+function playAlarm() {
+  if (isAlarmPlaying) return;
+  isAlarmPlaying = true;
+  try {
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ac.createOscillator();
+    const g = ac.createGain();
+    o.type = 'square';
+    o.frequency.value = 1000;
+    g.gain.value = 0.2;
+    o.connect(g);
+    g.connect(ac.destination);
+    o.start();
+    setTimeout(() => {
+      o.stop();
+      isAlarmPlaying = false;
+    }, 2000);
+  } catch(e) {
+    isAlarmPlaying = false;
+  }
+}
+
+function stopAlarm() {
+  isAlarmPlaying = false;
+}
+
+setTimeout(() => {
+    document.getElementById('loading').style.display = 'none';
+}, 1600);
+
+const targetUser = localStorage.getItem('currentViewUser');
+if (targetUser) {
+    localStorage.setItem('currentUser', targetUser);
+    localStorage.removeItem('currentViewUser');
+}
+
+const userName = localStorage.getItem('currentUser');
+document.getElementById('currentUser').innerText = userName;
+
+const userDB = JSON.parse(localStorage.getItem('userDB')) || {};
+const userInfo = userDB[userName] || {};
+
+let height = userInfo.height || "170";
+let weight = userInfo.weight || "65";
+let age = userInfo.age || "25";
+let gender = userInfo.gender || "未知";
+
+// ==============================================
+// 固定账号：张三、李四、王五、admin → 无弹窗，性别男
+// ==============================================
+const fixedMaleUsers = ["张三", "李四", "王五", "admin"];
+if (fixedMaleUsers.includes(userName)) {
+  gender = "男";
+  height = userInfo.height || "172";
+  weight = userInfo.weight || "66";
+  age = userInfo.age || "26";
+  document.getElementById('firstInfoModal').style.display = "none";
+} else {
+  if(!userInfo.height || !userInfo.weight){
+      document.getElementById('firstInfoModal').style.display = "flex";
+  }
+}
+
+let bmiValue = (weight / ((height / 100) ** 2)).toFixed(1);
+let bmiText = bmiValue + "（正常）";
+if (bmiValue < 18.5) bmiText = bmiValue + "（偏瘦）";
+else if (bmiValue > 24) bmiText = bmiValue + "（超重）";
+else if (bmiValue > 28) bmiText = bmiValue + "（肥胖）";
+
+document.getElementById('pHeight').innerText = height + " cm";
+document.getElementById('pWeight').innerText = weight + " kg";
+document.getElementById('pBmi').innerText = bmiText;
+document.getElementById('pAge').innerText = age + " 岁";
+document.getElementById('pGender').innerText = gender;
+
+function saveFirstInfo(){
+    let h = document.getElementById('firstHeight').value.trim();
+    let w = document.getElementById('firstWeight').value.trim();
+    let a = document.getElementById('firstAge').value.trim();
+    let g = document.getElementById('firstGender').value;
+    if(!h || !w || !a){
+        alert("请填写完整信息！");
+        return;
+    }
+    const db = JSON.parse(localStorage.getItem('userDB'));
+    db[userName].height = h;
+    db[userName].weight = w;
+    db[userName].age = a;
+    db[userName].gender = g;
+    localStorage.setItem('userDB', JSON.stringify(db));
+    alert("信息保存成功！");
+    document.getElementById('firstInfoModal').style.display = "none";
+    location.reload();
+}
+
+let heart = 85, breath = 18, hrv = 40, level = "正常";
+
+const tips = [
+    "心率变异性（HRV）越高，身体恢复能力越好",
+    "长期熬夜会降低HRV，增加跌倒与疲劳风险",
+    "突然起身容易头晕，记得缓慢变换体位",
+    "保持规律运动能显著提升心肺健康"
+];
+document.getElementById("healthTip").innerText = tips[Math.floor(Math.random()*tips.length)];
+
+function showModal(){document.getElementById('dataModal').style.display='flex'}
+function closeModal(){document.getElementById('dataModal').style.display='none'}
+function showReport(){
+    const rep = `用户：${userName}
+身高：${height}cm
+体重：${weight}kg
+BMI：${bmiText}
+心率：${heart}
+呼吸：${breath}
+HRV：${hrv}
+健康评级：${level}
+体态：正常
+跌倒风险：低`;
+    document.getElementById('reportText').innerText = rep;
+    document.getElementById('reportModal').style.display='flex';
+}
+function closeReport(){document.getElementById('reportModal').style.display='none'}
+
+function saveData(){
+    const h = document.getElementById('inpHeart').value;
+    const w = document.getElementById('inpWeight').value;
+    if(h){heart=parseInt(h);document.getElementById('heartNum').innerText=heart}
+    if(w){
+        weight = w;
+        document.getElementById('pWeight').innerText = w + ' kg';
+        const bmi = (w/((height/100)*(height/100))).toFixed(1);
+        let bt = bmi+"（正常）";
+        if(bmi<18.5)bt=bmi+"（偏瘦）";
+        else if(bmi>24)bt=bmi+"（超重）";
+        else if(bmi>28)bt=bmi+"（肥胖）";
+        document.getElementById('pBmi').innerText = bt;
+        bmiText = bt;
+    }
+    closeModal();
+    addLog("✍️ 手动更新健康数据");
+    alert("保存成功！");
+}
+
+function toggleTheme(){
+    document.body.classList.toggle('light');
+    addLog("🎨 切换界面主题");
+}
+
+function refreshData(){
+    if(isDeviceConnected) startRealData();
+    addLog("🔄 手动刷新健康数据");
+}
+
+function clearLog(){
+    document.getElementById('eventLog').innerHTML = '<div>🧹 日志已清空</div>';
+    addLog("🧹 事件日志已清空");
+}
+
+function toggleRotate(){
+    const m = document.getElementById('humanModel');
+    m.classList.toggle('stop');
+    addLog(m.classList.contains('stop') ? "⏸ 人体3D旋转已暂停" : "▶ 人体3D旋转已启动");
+}
+
+function getSeedRandom(seed) { let x = Math.sin(seed) * 10000; return x - Math.floor(x); }
+const userSeed = (userName && userName.length>0) ? userName.charCodeAt(0) : 1;
+const rand = (min, max) => Math.floor(getSeedRandom(userSeed) * (max-min+1)) + min;
+
+// ========== 修复：分账号独立睡眠数据，每个人完全不一样 ==========
+let sleepDeep, sleepLight, sleepRem;
+switch(userName){
+    case "admin":
+        sleepDeep  = [20,27,33,29,24,19,16,13,11,9];
+        sleepLight = [19,23,27,31,33,29,25,21,26,30];
+        sleepRem   = [11,16,21,26,31,36,33,29,23,19];
+        break;
+    case "张三":
+        sleepDeep  = [7,13,20,27,34,30,24,18,14,8];
+        sleepLight = [31,28,24,20,25,30,34,29,25,22];
+        sleepRem   = [26,32,37,43,39,34,28,23,27,31];
+        break;
+    case "李四":
+        sleepDeep  = [29,34,39,35,30,25,21,17,12,8];
+        sleepLight = [16,20,24,28,32,36,32,27,23,19];
+        sleepRem   = [17,22,28,34,40,45,41,36,30,24];
+        break;
+    case "王五":
+        sleepDeep  = [14,20,26,33,30,25,20,15,10,7];
+        sleepLight = [26,31,35,30,26,22,27,32,36,31];
+        sleepRem   = [23,28,33,39,44,49,45,40,34,29];
+        break;
+    default:
+        sleepDeep  = [12,18,25,32,28,22,16,14,10,8];
+        sleepLight = [22,26,30,28,24,20,26,30,32,29];
+        sleepRem   = [18,22,26,30,35,38,33,28,24,20];
+}
+
+let heartWave = [];
+const score = [rand(80,95),rand(65,85),rand(80,95),rand(85,95),rand(80,95)];
+const trend = [rand(80,92),rand(78,90),rand(82,94),rand(79,89),rand(83,93),rand(81,91),rand(84,95)];
+
+function showWaitingUI() {
+    document.getElementById('kpisContainer').innerHTML = `
+        <div class="kpi"><div class="num">--</div><div class="lab">实时心率</div></div>
+        <div class="kpi"><div class="num">--</div><div class="lab">呼吸频率</div></div>
+        <div class="kpi"><div class="num">--</div><div class="lab">心率变异性</div></div>
+        <div class="kpi"><div class="num">等待</div><div class="lab">健康评级</div></div>
+    `;
+}
+
+function startRealData() {
+    heart = rand(80, 95);
+    breath = rand(14, 22);
+    hrv = rand(30, 55);
+    level = heart < 85 ? "良好" : heart < 95 ? "正常" : "一般";
+    updateHeartWave();
+    document.getElementById('kpisContainer').innerHTML = `
+        <div class="kpi"><div class="num" id="heartNum">${heart}</div><div class="lab">实时心率</div></div>
+        <div class="kpi"><div class="num">${breath}</div><div class="lab">呼吸频率</div></div>
+        <div class="kpi"><div class="num" id="hrvNum">${hrv}</div><div class="lab">心率变异性</div></div>
+        <div class="kpi"><div class="num">${level}</div><div class="lab">健康评级</div></div>
+    `;
+}
+
+function updateHeartWave() {
+    heartWave = [];
+    for(let i=0;i<15;i++){
+        heartWave.push(heart + (Math.random()*6-3));
+    }
+    chart1.setOption({
+        yAxis: { min: Math.min(...heartWave)-10, max: Math.max(...heartWave)+10 },
+        series: [{ data: heartWave }]
+    });
+}
+
+function logout(){
+    if(confirm('确定退出登录？')){
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('fromEnterprise');
+        location.href='index.html';
+    }
+}
+
+document.getElementById('backBtn').onclick = function(){
+    location.href='enterprise.html';
+};
+
+showWaitingUI();
+
+const fromEnterprise = localStorage.getItem('fromEnterprise');
+if (fromEnterprise === 'true') {
+    document.getElementById('backBtn').style.display = 'inline-block';
+    document.getElementById('aiPanel').style.display = 'none';
+} else {
+    document.getElementById('aiPanel').style.display = 'block';
+}
+
+function connectDevice() {
+    if(isDeviceConnected) return;
+    isDeviceConnected = true;
+    document.getElementById('deviceStatus').innerText = "已连接";
+    document.getElementById('deviceStatus').style.color = "#22c55e";
+    startRealData();
+    alert("📡 设备连接成功！开始接收实时健康数据");
+    addLog("✅ 物联网设备连接成功");
+}
+
+function askAI(){
+    const chat=document.getElementById('aiChat');
+    const input=document.getElementById('aiQuestion');
+    const q=input.value.trim();
+    if(!q)return;
+    chat.innerHTML+=`<div class="msg-user">我：${q}</div>`;
+    input.value='';
+    let ans="我可以解答心率、睡眠、呼吸、疲劳、心脏健康等问题哦！";
+    if(q.includes('心率'))ans=`正常心率80-95，你的${heart}，状态良好～`;
+    if(q.includes('睡眠'))ans=`睡眠监测正常，深睡比例合理！`;
+    if(q.includes('呼吸'))ans=`正常呼吸12-20次/分，你的${breath}次/分完全正常～`;
+    if(q.includes('疲劳'))ans="HRV偏低易疲劳，建议规律作息、减少熬夜～";
+    if(q.includes('心脏'))ans="心脏波形稳定，无异常风险，请放心～";
+    if(q.includes('跌倒'))ans="毫米波雷达实时监测姿态、倾斜角与跌倒风险！";
+    setTimeout(()=>{chat.innerHTML+=`<div class="msg-ai">AI：${ans}</div>`;chat.scrollTop=chat.scrollHeight;},300);
+}
+
+function checkFall(){
+    const items=document.querySelectorAll('.pose-status');
+    items[0].className='pose-status pose-danger';
+    items[0].innerText='⚠️ 疑似跌倒';
+    items[1].className='pose-status pose-danger';
+    items[1].innerText='62°（危险）';
+    items[2].className='pose-status pose-danger';
+    items[2].innerText='⚠️ 高风险！';
+    playAlarm();
+    alert('⚠️ 毫米波雷达监测：检测到人体跌倒异常，已自动预警！');
+    localStorage.setItem('lastAlert',`${userName}疑似跌倒！`);
+    addLog("⚠️ 监测到跌倒异常，已触发声光报警");
+}
+
+// ========== 修复：睡眠河流图 Y轴锁死0，无负数，正常堆叠 ==========
+const sleepChart=echarts.init(document.getElementById('sleepChart'));
+sleepChart.setOption({backgroundColor:'transparent',tooltip:{trigger:'axis',axisPointer:{type:'shadow'},textStyle:{color:'#fff'},backgroundColor:'#121d37',borderColor:'#00d4ff',borderWidth:2},legend:{data:['深睡','浅睡','快速眼动'],textStyle:{color:'#8ab4f8'},top:0},grid:{left:'3%',right:'4%',bottom:'10%',top:'18%',containLabel:true},xAxis:{type:'category',data:['22:00','23:00','00:00','01:00','02:00','03:00','04:00','05:00','06:00','07:00'],axisLine:{lineStyle:{color:'#2a4a7a'}},axisLabel:{color:'#8ab4f8'}},yAxis:{type:'value',min:0,max:120,show:false},series:[{name:'深睡',type:'line',smooth:0.3,areaStyle:{color:'rgba(26,35,126,0.95)'},lineStyle:{width:0},data:sleepDeep,stack:'total'},{name:'浅睡',type:'line',smooth:0.3,areaStyle:{color:'rgba(76,175,80,0.85)'},lineStyle:{width:0},data:sleepLight,stack:'total'},{name:'快速眼动',type:'line',smooth:0.3,areaStyle:{color:'rgba(255,193,7,0.85)'},lineStyle:{width:0},data:sleepRem,stack:'total'}]});
+
+const chart1=echarts.init(document.getElementById('chart1'));
+chart1.setOption({backgroundColor:'transparent',tooltip:{trigger:'axis'},xAxis:{type:'category',data:[0,4,8,12,16,20,24,28,32,36,40,44,48,52,56],axisLine:{lineStyle:{color:'#2a4a7a'}},axisLabel:{color:'#8ab4f8'}},yAxis:{type:'value',min:50,max:100,axisLine:{lineStyle:{color:'#2a4a7a'}},axisLabel:{color:'#8ab4f8'}},series:[{type:'line',smooth:true,data:heartWave,itemStyle:{color:'#00d4ff'},areaStyle:{color:'rgba(0,212,255,0.2)'}}]});
+
+const chart2=echarts.init(document.getElementById('chart2'));
+chart2.setOption({backgroundColor:'transparent',tooltip:{trigger:'item'},radar:{indicator:[{name:'心率',max:100},{name:'压力',max:100},{name:'睡眠',max:100},{name:'HRV',max:100},{name:'呼吸',max:100}],axisName:{color:'#8ab4f8'},axisLine:{lineStyle:{color:'#2a4a7a'}},splitLine:{lineStyle:{color:'rgba(42,74,122,0.3)'}}},series:[{type:'radar',data:[score],itemStyle:{color:'#00d4ff'},areaStyle:{color:'rgba(0,212,255,0.2)'}}]});
+
+const chart3=echarts.init(document.getElementById('chart3'));
+chart3.setOption({backgroundColor:'transparent',tooltip:{trigger:'axis'},xAxis:{type:'category',data:['D1','D2','D3','D4','D5','D6','D7'],axisLine:{lineStyle:{color:'#2a4a7a'}},axisLabel:{color:'#8ab4f8'}},yAxis:{type:'value',min:0,max:100,axisLine:{lineStyle:{color:'#2a4a7a'}},axisLabel:{color:'#8ab4f8'}},series:[{type:'bar',data:trend,itemStyle:{color:'#00d4ff'}}]});
+
+function addLog(text) {
+    const log = document.getElementById('eventLog');
+    const d = document.createElement('div');
+    d.style.marginBottom = "4px";
+    d.style.color = text.includes("⚠️") ? "#ff4c4c" : "#8ab4f8";
+    d.innerText = `[${new Date().toLocaleTimeString()}] ${text}`;
+    log.appendChild(d);
+    log.scrollTop = log.scrollHeight;
+}
+
+function exportReport() {
+    const r = `====== 健康监测报告 ======
+用户：${userName}
+身高：${height}cm
+体重：${weight}kg
+BMI：${bmiText}
+心率：${heart}
+呼吸：${breath}
+HRV：${hrv}
+评级：${level}
+==========================`;
+    alert(r);
+    addLog("📄 生成并导出健康报告");
+}
+
+function toggleElderMode() {
+    document.body.style.fontSize = document.body.style.fontSize=="18px"?"16px":"18px";
+    alert("老年模式已切换：字体放大，预警增强");
+    addLog("👴 切换老年模式");
+}
+
+function callEmergency() {
+    playAlarm();
+    alert("🚨 紧急呼叫已触发！正在联系紧急联系人！");
+    addLog("🚨 用户触发一键紧急呼叫，报警声已启动");
+}
+
+document.querySelectorAll('.dot').forEach(dot => {
+    dot.addEventListener('mouseenter', () => {
+        dot.classList.add('active');
+    });
+    dot.addEventListener('mouseleave', () => {
+        dot.classList.remove('active');
+    });
+    dot.addEventListener('click', () => {
+        const name = dot.getAttribute('data-name');
+        alert(`【毫米波雷达监测】\n部位：${name}\n状态：正常\n姿态：稳定`);
+        addLog(`📌 查看部位：${name}，状态正常`);
+    });
+});
+
+setInterval(()=>{
+    if(!isDeviceConnected) return;
+
+    let oldHeart = heart;
+    heart += Math.floor(Math.random()*6)-3;
+    if (heart < 80) heart = 80;
+    if (heart > 95) heart = 95;
+
+    hrv = hrv + (Math.random() > 0.5 ? 1 : -1);
+    if(hrv < 25) hrv = 25 + Math.floor(Math.random() * 5);
+    if(hrv > 55) hrv = 55 - Math.floor(Math.random() * 5);
+
+    let change = Math.abs(heart - oldHeart);
+    let isHeartRisk = change >= 6;
+    let isHrvRisk = hrv <= 30;
+
+    const el = document.getElementById('heartNum');
+    const hrvEl = document.getElementById('hrvNum');
+    el.innerText = heart;
+    hrvEl.innerText = hrv;
+    updateHeartWave();
+    const pose = document.querySelectorAll('.pose-status');
+
+    if(isHeartRisk || isHrvRisk){
+        el.style.color="#ff4c4c";
+        el.classList.add('warn');
+        pose[0].innerText="⚠️ 姿态异常(头晕)";
+        pose[1].innerText="58°（危险）";
+        pose[2].innerText="⚠️ 跌倒风险升高！";
+        pose[0].className="pose-status pose-danger";
+        pose[1].className="pose-status pose-danger";
+        pose[2].className="pose-status pose-danger";
+        if (!isAlarmPlaying) {
+            playWarning();
+        }
+        addLog(`⚠️ 心率异常或HRV偏低，跌倒风险升高`);
+    }else{
+        el.style.color="#00d4ff";
+        el.classList.remove('warn');
+        pose[0].innerText="站立 / 行走";
+        pose[1].innerText="12°（正常）";
+        pose[2].innerText="无风险";
+        pose[0].className="pose-status pose-normal";
+        pose[1].className="pose-status pose-normal";
+        pose[2].className="pose-status pose-normal";
+        stopAlarm();
+    }
+}, 4000);
+
+window.addEventListener('resize', () => {
+    sleepChart.resize(); chart1.resize(); chart2.resize(); chart3.resize();
+});
+
+function doSearch() {
+    const keyword = document.getElementById('searchInput').value.trim();
+    if (keyword) {
+        window.open("https://www.baidu.com/s?wd=" + encodeURIComponent(keyword));
+    }
+}
+</script>
+</body>
+</html>
