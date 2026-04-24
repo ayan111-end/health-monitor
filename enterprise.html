@@ -3,147 +3,282 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>毫米波雷达远程健康监测平台（企业版）</title>
+<title>毫米波雷达远程健康监测平台</title>
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif;}
-body{background:#0a1428;color:#fff;padding:16px;min-height:100vh;}
-
-@keyframes glowText{0%{text-shadow:0 0 4px #00d4ff}50%{text-shadow:0 0 12px #00d4ff}100%{text-shadow:0 0 4px #00d4ff}}
-@keyframes roll{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
-@keyframes fadeIn{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
-@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-
-.header,.search-box,.user-card,.kpi,.panel{
-  border:2px solid #00d4ff!important;
-  box-shadow:0 0 10px #00d4ff,0 0 20px rgba(0,212,255,0.3)!important;
-  background:rgba(18,29,55,0.92)!important;
-  border-radius:12px!important;
-  transition:all 0.25s ease;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Microsoft YaHei", sans-serif;
+}
+body {
+  background: #0a1428;
+  color: #fff;
+  min-height: 100vh;
+  padding: 12px;
 }
 
-.header{padding:12px 20px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
-.header:hover{transform:scale(1.01)}
-.header .title{color:#00d4ff;font-size:20px;font-weight:bold;animation:glowText 2s infinite alternate;}
-.header .user-info{color:#8ab4f8;font-size:14px;display:flex;align-items:center;gap:10px;}
-.logout{color:#ff4c4c;cursor:pointer;font-weight:bold;padding:4px 8px;border-radius:6px;transition:all 0.2s;}
-.logout:hover{background:#ff4c4c;color:#fff;}
+@keyframes glowText {
+  0% { text-shadow: 0 0 4px #00d4ff; }
+  50% { text-shadow: 0 0 12px #00d4ff; }
+  100% { text-shadow: 0 0 4px #00d4ff; }
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 
-.marquee{background:#121d37;color:#ff4c4c;padding:8px;text-align:center;white-space:nowrap;overflow:hidden;margin-bottom:12px;border:1px solid #00d4ff;border-radius:8px;display:none;}
-.marquee-content{display:inline-block;animation:roll 12s linear infinite;font-weight:bold;}
+.card {
+  border: 2px solid #00d4ff;
+  box-shadow: 0 0 10px #00d4ff, 0 0 20px rgba(0,212,255,0.3);
+  background: rgba(18,29,55,0.92);
+  border-radius: 8px;
+  padding: 12px;
+  transition: 0.2s;
+}
+.card:hover{
+  box-shadow: 0 0 20px #00d4ff;
+}
+.card-title {
+  color: #00d4ff;
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  animation: glowText 2s infinite alternate;
+}
 
-.search-box{padding:15px;display:flex;gap:10px;align-items:center;margin-bottom:20px;}
-.search-box input{flex:1;height:40px;padding:0 15px;background:#0f1a30;border:1px solid #2a4a7a;border-radius:8px;color:#fff;outline:none;transition:all 0.2s;}
-.search-box input:focus{border-color:#00d4ff;box-shadow:0 0 8px #00d4ff;}
-.search-box button{padding:0 18px;height:40px;background:#0099ff;border:none;border-radius:8px;color:#fff;cursor:pointer;font-weight:bold;transition:all 0.2s;}
-.search-box button:hover{background:#00d4ff;color:#000;transform:scale(1.05);}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.header .title {
+  color: #00d4ff;
+  font-size: 20px;
+  font-weight: bold;
+  animation: glowText 2s infinite alternate;
+}
+.header .user-info {
+  color: #8ab4f8;
+  font-size: 14px;
+}
+.logout {
+  color: #ff4c4c;
+  cursor: pointer;
+  font-weight: bold;
+  margin-left: 10px;
+  transition: 0.2s;
+}
+.logout:hover{
+  text-shadow: 0 0 5px #ff4c4c;
+}
 
-.user-card{padding:15px;margin-bottom:20px;display:none;animation:fadeIn 0.4s ease;}
-.user-card.show{display:block!important;}
-.user-card .item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #1e2a46;color:#8ab4f8;}
-.user-card .item span:last-child{color:#00d4ff;font-weight:bold;}
-.go-btn{background:#00d4ff;color:#000;border:none;padding:8px 14px;border-radius:8px;cursor:pointer;margin-top:10px;width:100%;font-weight:bold;}
-.go-btn:hover{transform:scale(1.02);box-shadow:0 0 10px #00d4ff;}
+.search-box {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.search-box input {
+  flex: 1;
+  height: 36px;
+  padding: 0 12px;
+  background: #0f1a30;
+  border: 1px solid #2a4a7a;
+  border-radius: 6px;
+  color: #fff;
+  outline: none;
+  transition: 0.2s;
+}
+.search-box input:focus{
+  border-color: #00d4ff;
+}
+.search-box button {
+  padding: 0 16px;
+  height: 36px;
+  background: #0099ff;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+}
+.search-box button:hover{
+  opacity: 0.9;
+}
+.search-box button:disabled{
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:20px;}
-.kpi{padding:18px;text-align:center;cursor:pointer;}
-.kpi:hover{transform:scale(1.06);box-shadow:0 0 20px #00d4ff!important;}
-.kpi .num{font-size:30px;color:#00d4ff;font-weight:bold;margin-bottom:8px;}
-.kpi .lab{font-size:14px;color:#8ab4f8;}
+.layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 12px;
+}
 
-.main{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;}
-.panel{padding:15px;position:relative;}
-.panel:hover{transform:scale(1.01)}
-.panel .panel-title{font-size:18px;color:#00d4ff;margin-bottom:12px;animation:glowText 2s infinite alternate;}
-.chart{width:100%;height:280px;}
+.left-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.user-card {
+  display: none;
+}
+.user-card.show {
+  display: block;
+}
+.user-card .item {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  color: #8ab4f8;
+  font-size: 14px;
+}
+.go-btn {
+  background: #00d4ff;
+  color: #000;
+  border: none;
+  padding: 8px;
+  border-radius: 6px;
+  width: 100%;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 8px;
+  transition: 0.2s;
+}
+.go-btn:hover{
+  opacity: 0.9;
+}
 
-/* -------- 用户管理模块样式 -------- */
-.user-manage{
-  border:2px solid #00d4ff;
-  box-shadow:0 0 10px #00d4ff,0 0 20px rgba(0,212,255,0.3);
-  background:rgba(18,29,55,0.92);
-  border-radius:12px;
-  padding:16px;
-  margin:20px 0;
-  animation:fadeIn 0.4s ease;
+.left-panel .card:last-child {
+  height: 670px !important; 
+  flex-direction: column;
+  display: flex;
 }
-.um-title{
-  color:#00d4ff;
-  font-size:18px;
-  font-weight:bold;
-  margin-bottom:12px;
-  animation:glowText 2s infinite alternate;
+
+.um-table-wrapper {
+  flex: 1;
+  overflow-y: auto !important; 
+  overflow-x: hidden;
+  padding-right: 4px;
+  margin-top: 4px;
 }
-.um-form{
-  display:flex;
-  gap:10px;
-  margin-bottom:14px;
-  flex-wrap:wrap;
+
+.um-table-wrapper::-webkit-scrollbar {
+  width: 6px;
 }
-.um-form input{
-  flex:1;
-  min-width:100px;
-  height:38px;
-  padding:0 12px;
-  background:#0f1a30;
-  border:1px solid #2a4a7a;
-  border-radius:8px;
-  color:#fff;
-  outline:none;
+.um-table-wrapper::-webkit-scrollbar-thumb {
+  background: #00d4ff;
+  border-radius: 3px;
 }
-.um-form input:focus{
-  border-color:#00d4ff;
-  box-shadow:0 0 6px #00d4ff;
+.um-table-wrapper::-webkit-scrollbar-track {
+  background: #101b33;
 }
-.um-btn{
-  padding:0 14px;
-  height:38px;
-  background:#00d4ff;
-  border:none;
-  border-radius:8px;
-  color:#000;
-  font-weight:bold;
-  cursor:pointer;
+
+.um-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #fff;
+  font-size: 13px;
+  table-layout: fixed;
 }
-.um-btn:hover{
-  transform:scale(1.04);
+.um-table th, .um-table td {
+  padding: 8px;
+  text-align: center;
+  border: 1px solid #2a4a7a;
+  white-space: nowrap;
 }
-.um-table{
-  width:100%;
-  border-collapse:collapse;
-  color:#fff;
-  font-size:14px;
-}
-.um-table th,.um-table td{
-  padding:10px;
-  text-align:center;
-  border:1px solid #2a4a7a;
-}
-.um-table th{
-  background:#121d37;
-  color:#00d4ff;
+.um-table th {
+  background: #121d37;
+  color: #00d4ff;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 .um-table tr:hover{
-  background:#1a2948;
+  background: rgba(0,212,255,0.1);
 }
-.um-del{
-  color:#ff4c4c;
-  cursor:pointer;
-  font-weight:bold;
+.um-edit {
+  color: #00d4ff;
+  cursor: pointer;
+  margin-right: 6px;
 }
-.um-edit{
-  color:#00d4ff;
-  cursor:pointer;
-  font-weight:bold;
-  margin-right:6px;
+.um-del {
+  color: #ff4c4c;
+  cursor: pointer;
+}
+.empty-tip{
+  text-align: center;
+  padding: 20px 0;
+  color: #8ab4f8;
+}
+
+.right-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.kpi {
+  text-align: center;
+}
+.kpi .num {
+  font-size: 24px;
+  color: #00d4ff;
+  font-weight: bold;
+  margin-bottom: 4px;
+  transition: 0.3s;
+}
+.kpi .lab {
+  font-size: 13px;
+  color: #8ab4f8;
+}
+
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.chart {
+  width: 100%;
+  height: 220px;
+}
+
+#loading {
+  position: fixed;
+  inset: 0;
+  background: #0a1428;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #00d4ff;
+  font-size: 22px;
+  flex-direction: column;
+  gap: 16px;
+}
+.loader-circle {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(0,212,255,0.3);
+  border-top-color: #00d4ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 </style>
 </head>
 
 <body>
-<div id="loading" style="position:fixed;inset:0;background:#0a1428;z-index:9999;display:flex;align-items:center;justify-content:center;color:#00d4ff;font-size:22px;flex-direction:column;gap:16px;">
-  <div style="width:50px;height:50px;border:4px solid rgba(0,212,255,0.3);border-top-color:#00d4ff;border-radius:50%;animation:spin 1s linear infinite;"></div>
-  加载中...
+<div id="loading">
+  <div class="loader-circle"></div>
+  <div>加载中...</div>
 </div>
 
 <div class="header">
@@ -156,72 +291,92 @@ body{background:#0a1428;color:#fff;padding:16px;min-height:100vh;}
   <button onclick="searchUser()">搜索用户</button>
 </div>
 
-<div class="user-card" id="userCard">
-  <div class="item"><span>用户名</span><span id="s_name"></span></div>
-  <div class="item"><span>账号类型</span><span id="s_type"></span></div>
-  <div class="item"><span>健康状态</span><span id="s_status"></span></div>
-  <button class="go-btn" onclick="goPersonal()">进入该用户健康中心</button>
-</div>
+<div class="layout">
+  <div class="left-panel">
+    <div class="card user-card" id="userCard">
+      <div class="card-title">用户信息</div>
+      <div class="item"><span>用户名</span><span id="s_name"></span></div>
+      <div class="item"><span>账号类型</span><span id="s_type"></span></div>
+      <div class="item"><span>健康状态</span><span id="s_status"></span></div>
+      <button class="go-btn" onclick="goPersonal()">进入该用户健康中心</button>
+    </div>
 
-<!-- ====================== 用户管理模块 ====================== -->
-<div class="user-manage" id="userManage">
-  <div class="um-title">👥 用户管理模块（企业版）</div>
-  <div class="um-form">
-    <input id="newUserName" placeholder="用户名" required>
-    <input id="newUserGender" placeholder="性别" required>
-    <input id="newUserAge" placeholder="年龄" required>
-    <input id="newUserHeight" placeholder="身高(cm)" required>
-    <input id="newUserWeight" placeholder="体重(kg)" required>
-    <button class="um-btn" onclick="addUser()">添加用户</button>
+    <div class="card">
+      <div class="card-title">👥 用户管理模块</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+        <input id="newUserName" placeholder="用户名" style="flex:1;height:32px;padding:0 8px;background:#0f1a30;border:1px solid #2a4a7a;border-radius:4px;color:#fff;outline:none;">
+        <input id="newUserGender" placeholder="性别" style="width:70px;height:32px;padding:0 8px;background:#0f1a30;border:1px solid #2a4a7a;border-radius:4px;color:#fff;outline:none;">
+        <input id="newUserAge" placeholder="年龄" style="width:70px;height:32px;padding:0 8px;background:#0f1a30;border:1px solid #2a4a7a;border-radius:4px;color:#fff;outline:none;">
+        <input id="newUserHeight" placeholder="身高" style="width:80px;height:32px;padding:0 8px;background:#0f1a30;border:1px solid #2a4a7a;border-radius:4px;color:#fff;outline:none;">
+        <input id="newUserWeight" placeholder="体重" style="width:80px;height:32px;padding:0 8px;background:#0f1a30;border:1px solid #2a4a7a;border-radius:4px;color:#fff;outline:none;">
+        <button id="addBtn" onclick="addUser()" style="padding:0 12px;height:32px;background:#00d4ff;border:none;border-radius:4px;color:#000;font-weight:bold;cursor:pointer;">添加</button>
+      </div>
+      
+      <div class="um-table-wrapper">
+        <table class="um-table">
+          <thead>
+            <tr>
+              <th>用户名</th>
+              <th>性别</th>
+              <th>年龄</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="userList"></tbody>
+        </table>
+      </div>
+    </div>
   </div>
-  <table class="um-table">
-    <thead>
-      <tr>
-        <th>用户名</th>
-        <th>性别</th>
-        <th>年龄</th>
-        <th>身高</th>
-        <th>体重</th>
-        <th>操作</th>
-      </tr>
-    </thead>
-    <tbody id="userList"></tbody>
-  </table>
-</div>
 
-<div class="kpis">
-  <div class="kpi"><div class="num" id="u1">1286</div><div class="lab">监测用户</div></div>
-  <div class="kpi"><div class="num" id="u2">342</div><div class="lab">今日在线</div></div>
-  <div class="kpi"><div class="num" id="u3">98.7%</div><div class="lab">识别准确率</div></div>
-  <div class="kpi"><div class="num" id="u4">148</div><div class="lab">健康预警</div></div>
-</div>
+  <div class="right-panel">
+    <div class="kpis">
+      <div class="card kpi"><div class="num" id="u1">0</div><div class="lab">监测用户</div></div>
+      <div class="card kpi"><div class="num" id="u2">0</div><div class="lab">今日在线</div></div>
+      <div class="card kpi"><div class="num" id="u3">0%</div><div class="lab">识别准确率</div></div>
+      <div class="card kpi"><div class="num" id="u4">0</div><div class="lab">健康预警</div></div>
+    </div>
 
-<div class="main">
-  <div class="panel">
-    <div class="panel-title">24小时监测趋势</div>
-    <div id="chart2" class="chart"></div>
-  </div>
-  <div class="panel">
-    <div class="panel-title">健康等级分布</div>
-    <div id="chart3" class="chart"></div>
-  </div>
-  <div class="panel">
-    <div class="panel-title">异常类型统计</div>
-    <div id="chart5" class="chart"></div>
-  </div>
-  <div class="panel">
-    <div class="panel-title">用户在线时段统计</div>
-    <div id="chart4" class="chart"></div>
+    <div class="chart-grid">
+      <div class="card">
+        <div class="card-title">24小时监测趋势</div>
+        <div id="chart2" class="chart"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">健康等级分布</div>
+        <div id="chart3" class="chart"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">异常类型统计</div>
+        <div id="chart5" class="chart"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">用户在线时段统计</div>
+        <div id="chart4" class="chart"></div>
+      </div>
+    </div>
   </div>
 </div>
 
 <script>
-function removeLoading(){const l=document.getElementById('loading');if(l)l.style.display='none';}
-setTimeout(removeLoading,1000);
-
 let currentUser = '';
+let loading = false;
+let c2,c3,c4,c5;
 
-// 统一用户数据库（基础信息 + 健康数据）
+// 获取真实总用户数（核心！图表全靠这个数动态变化）
+function getTotalUser(){
+  const db = JSON.parse(localStorage.getItem('userDB') || '{}');
+  let count = 0;
+  for(let k in db){
+    if(k !== 'company') count++;
+  }
+  return count;
+}
+
+function removeLoading(){
+  const l = document.getElementById('loading');
+  if(l) l.style.display='none';
+}
+
 function resetUserDB() {
   localStorage.setItem('userDB', JSON.stringify({
     "张三": { type: "personal", gender:"男", age:30, height:175, weight:70, heart: 68, breath: 16, hrv: 38, level: "良好" },
@@ -231,81 +386,169 @@ function resetUserDB() {
   }));
 }
 
-window.onload=function(){
-  if(!localStorage.getItem('userDB')){
-    resetUserDB();
+const API = {
+  async getUserList(){
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return JSON.parse(localStorage.getItem('userDB') || '{}');
+  },
+  async addUser(data){
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const db = JSON.parse(localStorage.getItem('userDB'));
+    db[data.name] = data.info;
+    localStorage.setItem('userDB', JSON.stringify(db));
+    updateAllChart(); // 添加用户后刷新图表
+    return { code:200, msg:'添加成功' };
+  },
+  async delUser(name){
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const db = JSON.parse(localStorage.getItem('userDB'));
+    delete db[name];
+    localStorage.setItem('userDB', JSON.stringify(db));
+    updateAllChart(); // 删除用户后刷新图表
+    return { code:200, msg:'删除成功' };
+  },
+  async updateUser(name, info){
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const db = JSON.parse(localStorage.getItem('userDB'));
+    db[name] = { ...db[name], ...info };
+    localStorage.setItem('userDB', JSON.stringify(db));
+    return { code:200, msg:'更新成功' };
   }
+}
 
-  const c2=echarts.init(document.getElementById('chart2'));
-  c2.setOption({backgroundColor:'transparent',tooltip:{trigger:'axis'},
-  xAxis:{type:'category',data:['0时','4时','8时','12时','16时','20时'],axisLine:{lineStyle:{color:'#2a4a7a'}},axisLabel:{color:'#8ab4f8'}},
-  yAxis:{type:'value',axisLine:{lineStyle:{color:'#2a4a7a'}},axisLabel:{color:'#8ab4f8'}},
-  series:[{type:'line',smooth:true,data:[120,210,340,480,420,350],itemStyle:{color:'#00d4ff'},areaStyle:{color:'rgba(0,212,255,0.2)'}}]});
+async function updateKPI(){
+  const db = await API.getUserList();
+  let total = 0, online = 0, warn = 0;
+  for(let k in db){
+    if(k === 'company') continue;
+    total++;
+    online += Math.random() > 0.3 ? 1 : 0;
+    if(db[k].heart > 80 || db[k].breath > 20) warn++;
+  }
+  document.getElementById('u1').innerText = total;
+  document.getElementById('u2').innerText = online;
+  document.getElementById('u3').innerText = (97 + Math.random()*3).toFixed(1)+'%';
+  document.getElementById('u4').innerText = warn;
+}
 
-  const c3=echarts.init(document.getElementById('chart3'));
-  c3.setOption({backgroundColor:'transparent',tooltip:{trigger:'item'},
-  series:[{type:'pie',radius:['30%','60%'],data:[
-  {value:68,name:'健康',itemStyle:{color:'#00d4ff'}},
-  {value:22,name:'一般',itemStyle:{color:'#facc15'}},
-  {value:10,name:'异常',itemStyle:{color:'#ff4c4c'}}
-  ],label:{color:'#fff'}}]});
+async function updateVitalSigns(){
+  const db = await API.getUserList();
+  for(let k in db){
+    if(k === 'company') continue;
+    db[k].heart = Math.max(60, Math.min(100, db[k].heart + (Math.random()*4 - 2)));
+    db[k].breath = Math.max(12, Math.min(24, db[k].breath + (Math.random()*2 - 1)));
+  }
+  localStorage.setItem('userDB', JSON.stringify(db));
+  updateKPI();
+}
 
-  const c4=echarts.init(document.getElementById('chart4'));
-  c4.setOption({backgroundColor:'transparent',tooltip:{trigger:'axis'},
-  xAxis:{type:'category',data:['凌晨','上午','下午','晚上'],axisLine:{lineStyle:{color:'#2a4a7a'}},axisLabel:{color:'#8ab4f8'}},
-  yAxis:{type:'value',axisLine:{lineStyle:{color:'#2a4a7a'}},axisLabel:{color:'#8ab4f8'}},
-  series:[{type:'bar',data:[210,380,450,320],itemStyle:{color:'#0099ff'}}]});
+async function renderUserList(){
+  const db = await API.getUserList();
+  const list = document.getElementById('userList');
+  list.innerHTML = '';
+  let hasUser = false;
+  for(let name in db){
+    if(name === 'company') continue;
+    hasUser = true;
+    const u = db[name];
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${name}</td>
+      <td>${u.gender||'-'}</td>
+      <td>${u.age||'-'}</td>
+      <td>
+        <span class="um-edit" onclick="editUser('${name}')">编辑</span>
+        <span class="um-del" onclick="delUser('${name}')">删除</span>
+      </td>
+    `;
+    list.appendChild(tr);
+  }
+  if(!hasUser){
+    list.innerHTML = '<tr><td colspan="4" class="empty-tip">暂无用户数据</td></tr>';
+  }
+  updateAllChart(); // 渲染列表后刷新图表
+}
 
-  const c5=echarts.init(document.getElementById('chart5'));
+// ========== 核心：图表数据 跟随 真实用户总数 动态变化 ==========
+function updateAllChart(){
+  const total = getTotalUser(); // 获取当前真实用户数
+
+  // 1. 24小时监测趋势：数值 = 0 ~ 总用户数
+  const lineData = Array.from({length:6},()=> Math.floor(Math.random() * total) || 0);
+  c2.setOption({
+    backgroundColor:'transparent',tooltip:{trigger:'axis'},
+    xAxis:{type:'category',data:['0时','4时','8时','12时','16时','20时'],axisLine:{lineStyle:{color:'#2a4a7a'}},axisLabel:{color:'#8ab4f8'}},
+    yAxis:{type:'value',name:'监测人数',min:0,max:total || 5,axisLine:{lineStyle:{color:'#2a4a7a'}},axisLabel:{color:'#8ab4f8'}},
+    series:[{type:'line',smooth:true,data:lineData,itemStyle:{color:'#00d4ff'},areaStyle:{color:'rgba(0,212,255,0.2)'}}]
+  });
+
+  // 2. 健康等级分布
+  let h = Math.floor(Math.random()*30 + 50);
+  let m = Math.floor(Math.random()*20 + 15);
+  let e = Math.floor(Math.random()*10 + 5);
+  c3.setOption({
+    backgroundColor:'transparent',tooltip:{trigger:'item'},
+    series:[{type:'pie',radius:['30%','60%'],data:[
+      {value:h,name:'健康',itemStyle:{color:'#00d4ff'}},
+      {value:m,name:'一般',itemStyle:{color:'#facc15'}},
+      {value:e,name:'异常',itemStyle:{color:'#ff4c4c'}}
+    ],label:{color:'#fff'}}]
+  });
+
+  // 3. 用户在线时段统计：数值 = 0 ~ 总用户数
+  const barData = Array.from({length:4},()=> Math.floor(Math.random() * total) || 0);
+  c4.setOption({
+    backgroundColor:'transparent',tooltip:{trigger:'axis'},
+    xAxis:{type:'category',data:['凌晨','上午','下午','晚上'],axisLine:{lineStyle:{color:'#2a4a7a'}},axisLabel:{color:'#8ab4f8'}},
+    yAxis:{type:'value',name:'在线人数',min:0,max:total || 5,axisLine:{lineStyle:{color:'#2a4a7a'}},axisLabel:{color:'#8ab4f8'}},
+    series:[{type:'bar',data:barData,itemStyle:{color:'#0099ff'}}]
+  });
+
+  // 4. 异常类型统计
+  let r1 = Math.floor(Math.random()*40 + 70);
+  let r2 = Math.floor(Math.random()*30 + 50);
+  let r3 = Math.floor(Math.random()*20 + 30);
   c5.setOption({
-    backgroundColor: 'transparent',
-    tooltip: { trigger: 'item' },
+    backgroundColor: 'transparent',tooltip: { trigger: 'item' },
     series: [{
-      type: 'pie',
-      radius: ['40%', '70%'],
+      type: 'pie',radius: ['40%', '70%'],
       data: [
-        { value: 86, name: '心率异常', itemStyle: { color: '#ff4c4c' } },
-        { value: 62, name: '呼吸异常', itemStyle: { color: '#ff9800' } },
-        { value: 41, name: '睡眠异常', itemStyle: { color: '#8c9eff' } },
-      ],
-      label: { color: '#fff' }
+        { value: r1, name: '心率异常', itemStyle: { color: '#ff4c4c' } },
+        { value: r2, name: '呼吸异常', itemStyle: { color: '#ff9800' } },
+        { value: r3, name: '睡眠异常', itemStyle: { color: '#8c9eff' } }
+      ],label: { color: '#fff' }
     }]
   });
+}
 
-  removeLoading();
-  window.addEventListener('resize',()=>{
-    c2.resize();c3.resize();c4.resize();c5.resize();
-  });
-  startAuto();
-  renderUserList();
-};
-
-function logout(){if(confirm('确定退出？'))location.href='index.html';}
+function logout(){
+  if(confirm('确定退出？'))location.href='index.html';
+}
 
 function searchUser(){
-const inputVal = document.getElementById('searchUser').value.trim();
-const card = document.getElementById('userCard');
-if(!inputVal){
-  alert('请输入用户名');
-  card.classList.remove('show');
-  currentUser = '';
-  return;
-}
-const userDB = JSON.parse(localStorage.getItem('userDB')) || {};
-if(userDB[inputVal]){
-  currentUser = inputVal;
-  document.getElementById('s_name').innerText = inputVal;
-  document.getElementById('s_type').innerText = userDB[inputVal].type === 'personal' ? '个人账号' : '企业账号';
-  let status = '正常';
-  if(userDB[inputVal].heart > 80) status = '心率偏高';
-  if(userDB[inputVal].breath > 21) status = '呼吸偏快';
-  document.getElementById('s_status').innerText = status;
-  card.classList.add('show');
-}else{
-  alert('未找到用户：'+inputVal+'\n测试账号：张三、李四、王五');
-  card.classList.remove('show');
-  currentUser = '';
-}
+  const inputVal = document.getElementById('searchUser').value.trim();
+  const card = document.getElementById('userCard');
+  if(!inputVal){
+    alert('请输入用户名');
+    card.classList.remove('show');
+    currentUser = '';
+    return;
+  }
+  const userDB = JSON.parse(localStorage.getItem('userDB')) || {};
+  if(userDB[inputVal]){
+    currentUser = inputVal;
+    document.getElementById('s_name').innerText = inputVal;
+    document.getElementById('s_type').innerText = userDB[inputVal].type === 'personal' ? '个人账号' : '企业账号';
+    let status = '正常';
+    if(userDB[inputVal].heart > 80) status = '心率偏高';
+    if(userDB[inputVal].breath > 21) status = '呼吸偏快';
+    document.getElementById('s_status').innerText = status;
+    card.classList.add('show');
+  }else{
+    alert('未找到用户：'+inputVal+'\n测试账号：张三、李四、王五');
+    card.classList.remove('show');
+    currentUser = '';
+  }
 }
 
 function goPersonal(){
@@ -320,83 +563,64 @@ function goPersonal(){
 
 document.getElementById('searchUser').addEventListener('keydown',e=>{if(e.key=='Enter')searchUser();});
 
-function startAuto(){
-setInterval(()=>{
-document.getElementById('u1').innerText=1286+Math.floor(Math.random()*7)-3;
-document.getElementById('u2').innerText=342+Math.floor(Math.random()*10)-5;
-document.getElementById('u3').innerText=(98.7+(Math.random()*0.2-0.1)).toFixed(1)+'%';
-document.getElementById('u4').innerText=148+Math.floor(Math.random()*6)-3;
-},5000);
-}
-
-// ====================== 用户管理（只管理基础信息） ======================
-function renderUserList(){
-  const userDB = JSON.parse(localStorage.getItem('userDB')) || {};
-  const list = document.getElementById('userList');
-  list.innerHTML = '';
-  for(let name in userDB){
-    if(name === 'company') continue;
-    const u = userDB[name];
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${name}</td>
-      <td>${u.gender||'-'}</td>
-      <td>${u.age||'-'}</td>
-      <td>${u.height||'-'}cm</td>
-      <td>${u.weight||'-'}kg</td>
-      <td>
-        <span class="um-edit" onclick="editUser('${name}')">编辑</span>
-        <span class="um-del" onclick="delUser('${name}')">删除</span>
-      </td>
-    `;
-    list.appendChild(tr);
-  }
-}
-
-function addUser(){
+async function addUser(){
+  if(loading) return;
+  const btn = document.getElementById('addBtn');
   const name = document.getElementById('newUserName').value.trim();
-  const gender = document.getElementById('newUserGender').value.trim();
+  let gender = document.getElementById('newUserGender').value.trim();
   const age = document.getElementById('newUserAge').value.trim();
   const height = document.getElementById('newUserHeight').value.trim();
   const weight = document.getElementById('newUserWeight').value.trim();
-
-  if(!name || !gender || !age || !height || !weight){
-    alert('请填写完整信息');
-    return;
-  }
-
   const userDB = JSON.parse(localStorage.getItem('userDB')) || {};
-  userDB[name] = {
-    type: 'personal',
-    gender: gender,
-    age: age,
-    height: height,
-    weight: weight,
-    heart: 70,
-    breath: 18,
-    hrv: 35,
-    level: "良好"
-  };
 
-  localStorage.setItem('userDB', JSON.stringify(userDB));
-  renderUserList();
+  if(!name){ alert('请输入用户名！'); return; }
+  if(userDB[name]){ alert('用户名已存在！'); return; }
+  gender = gender === '男' || gender === '女' ? gender : '';
+  if(!gender){ alert('性别只能填男/女！'); return; }
+  if(!/^\d+$/.test(age) || age < 1 || age > 120){ alert('年龄不合法！'); return; }
+  if(!/^\d+$/.test(height) || height < 50 || height > 250){ alert('身高不合法！'); return; }
+  if(!/^\d+$/.test(weight) || weight < 1 || weight > 300){ alert('体重不合法！'); return; }
+
+  loading = true;
+  btn.innerText = '添加中...';
+  btn.disabled = true;
+
+  const res = await API.addUser({
+    name, info:{
+      type: 'personal', gender, age, height, weight,
+      heart: 70, breath: 18, hrv: 35, level: "良好"
+    }
+  });
+
+  alert(res.msg);
+  loading = false;
+  btn.innerText = '添加';
+  btn.disabled = false;
   document.getElementById('newUserName').value='';
   document.getElementById('newUserGender').value='';
   document.getElementById('newUserAge').value='';
   document.getElementById('newUserHeight').value='';
   document.getElementById('newUserWeight').value='';
-  alert('用户添加成功！已同步至个人中心');
+  
+  await renderUserList();
+  updateKPI();
 }
 
-function delUser(name){
+async function delUser(name){
+  if(loading) return;
   if(!confirm('确定删除用户：'+name+'？')) return;
-  const userDB = JSON.parse(localStorage.getItem('userDB'));
-  delete userDB[name];
-  localStorage.setItem('userDB', JSON.stringify(userDB));
-  renderUserList();
+  
+  loading = true;
+  const res = await API.delUser(name);
+  alert(res.msg);
+  loading = false;
+  
+  await renderUserList();
+  updateKPI();
 }
 
-function editUser(name){
+async function editUser(name){
+  if(loading) return;
   const userDB = JSON.parse(localStorage.getItem('userDB'));
   const u = userDB[name];
 
@@ -406,14 +630,39 @@ function editUser(name){
   const weight = prompt('修改体重(kg)', u.weight);
 
   if(!gender || !age || !height || !weight) return;
+  if(gender !== '男' && gender !== '女'){ alert('性别只能填男/女！'); return; }
+  if(!/^\d+$/.test(age) || age < 1 || age > 120){ alert('年龄不合法！'); return; }
 
-  u.gender = gender;
-  u.age = age;
-  u.height = height;
-  u.weight = weight;
-
-  localStorage.setItem('userDB', JSON.stringify(userDB));
+  loading = true;
+  const res = await API.updateUser(name, { gender, age, height, weight });
+  alert(res.msg);
+  loading = false;
+  
   renderUserList();
 }
+
+// 初始化
+window.onload = async function(){
+  if(!localStorage.getItem('userDB')) resetUserDB();
+
+  c2 = echarts.init(document.getElementById('chart2'));
+  c3 = echarts.init(document.getElementById('chart3'));
+  c4 = echarts.init(document.getElementById('chart4'));
+  c5 = echarts.init(document.getElementById('chart5'));
+
+  updateAllChart();
+  setInterval(updateAllChart, 3000);
+
+  window.addEventListener('resize',()=>{
+    c2.resize();c3.resize();c4.resize();c5.resize();
+  });
+
+  await renderUserList();
+  updateKPI();
+  removeLoading();
+
+  setInterval(updateVitalSigns, 3000);
+};
 </script>
-</body></html>
+</body>
+</html>
